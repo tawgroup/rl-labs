@@ -13,7 +13,9 @@ def main():
     tok.pad_token = tok.eos_token
     ds = load_dataset("json", data_files="data/raw/tinystories.jsonl", split="train")
     def tok_fn(b):
-        return tok(b["text"], truncation=True, max_length=128)
+        t = tok(b["text"], truncation=True, max_length=128, padding="max_length")
+        t["labels"] = [ids[:] for ids in t["input_ids"]]
+        return t
     ds = ds.map(tok_fn, batched=True, remove_columns=["text"])
 
     cfg = GPT2Config(n_layer=4, n_head=4, n_embd=256, vocab_size=tok.vocab_size)
